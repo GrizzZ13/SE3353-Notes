@@ -450,7 +450,7 @@ Authentication Problem：
 
 
 
-Kerbos协议的流程（PPT security第62张的图）
+Kerberos协议的流程（PPT security第62张的图）
 
 1. 用户想要访问交大财务，现在有一个认证中心的服务器
 2. 用户在客户端输入UserId和Pwd
@@ -458,17 +458,17 @@ Kerbos协议的流程（PPT security第62张的图）
 4. 服务器段根据UserId找到一个user，经过相同的hash算法产生一个key_as
 5. key不能在网络上传输的，若AS用key_as加密一个东西（session key，一段时间内有效），user可以拿自己的key_user解密，说明密码对了
 6. AS认证之后要进行授权，需要和TGS交互，不能明文交互。AS产生一个session key，通过刚才AS生成的key进行加密，用户拿到session key之后和TGS交互，但是是否相互信任？看下变的流程
-7. TGS用TGS的pub_key加密一个session key产生message_b
-8. user不能解开message_b，则原封不动传回去，把session key和message_b发回去
-9. session key用TGS_pubkey加密之后产生message_c，把UserId和timestamp用session key加密之后产生message_d
-10. TGS拿自己的private key解密得到session key，再用session key解密message_d得到信息，知道你在什么时候想要访问
+7. AS用TGS的pub_key加密一个session key产生message_b
+8. user不能解开message_b，则原封不动把这个信息发给TGS，称为message_c
+9. user把UserId和timestamp用session key加密之后产生message_d
+10. TGS拿自己的private key解密message_c得到session key，再用session key解密message_d得到信息，知道你在什么时候想要访问
 11. 接着TGS进入TGS的数据库查权限信息，有权限才接着进行下一步
 12. TGS会生成一个新的key，用于user和交大财务交互
 13. TGS用session key加密上边说的user和交大财务交互的key，称message_f，传给user，user就可以用session key解开然后拿到key
 14. TGS生成message_e，用交大财务的pub_key加密user和交大财务交互的key，同时附带user client的IP等信息
-15. user解密message_f之后，没有交大财务的private key，所以message_e解不开，把message_e原封不动的发回来，交大财务解开之后能拿到client的信息和密钥
-16. 用户再发给交大财务client一个message_g，包含client信息，用user和交大财务交互的key加密。交大财务已经有了这个key，因此可以拿到信息
-17. 由于TGS是用交大财务的pub_key加密的，所以这个肯定是一个真的网站，不是一个钓鱼网站
+15. user可以解密message_f，但是没有交大财务的private key，所以message_e解不开，把message_e原封不动的发给交大财务，交大财务解开之后能拿到client的信息和密钥
+16. user再用user和交大财务交互的key加密user信息，称为message_g，发给交大财务服务器。交大财务已经有了这个key，因此可以拿到信息
+17. 由于TGS是用交大财务的pub_key加密的message_e，所以这个肯定是一个真的网站，不是一个钓鱼网站
 18. 交大财务用user和交大财务交互的key加密每次user发来的时间戳+1，称为message_h，client可以检查这个时间戳对不对，以验证交大财务server对不对。
 
 
